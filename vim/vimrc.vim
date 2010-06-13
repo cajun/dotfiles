@@ -29,7 +29,9 @@
 
 
 set nocompatible
-set shell=/bin/bash
+if has('mac')
+  set shell=/bin/bash
+endif
 
 " Extras ************************************************************************
 set wildmenu " This allows a small menu to appear at the botttom and not a new buffer
@@ -62,7 +64,7 @@ function! Tabstyle_spaces()
   set expandtab
 endfunction
 
-call Tabstyle_spaces()
+"call Tabstyle_spaces()
 
 
 " Indenting *******************************************************************
@@ -111,7 +113,7 @@ colorscheme vibrantink
 " Status Line *****************************************************************
 set showcmd
 set ruler " Show ruler
-"set ch=2 " Make command line two lines high
+set ch=2 " Make command line two lines high
 " match LongLineWarning '\%120v.*' " Error format when a line is longer than 120
 
 
@@ -126,6 +128,8 @@ imap uu _
 imap hh =>
 imap aa @
 
+" Helpful copy lines of last search to new window
+nmap <F3> :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
 
 " Directories *****************************************************************
 " Setup backup location and enable
@@ -171,7 +175,7 @@ set nolist
 
 
 " Mouse ***********************************************************************
-"set mouse=a " Enable the mouse
+set mouse=a " Enable the mouse
 "behave xterm
 "set selectmode=mouse
 
@@ -182,15 +186,15 @@ map <F5> :!ruby %<CR>
 
 
 " Omni Completion *************************************************************
-autocmd FileType html :set omnifunc=htmlcomplete#CompleteTags
-autocmd FileType python set omnifunc=pythoncomplete#Complete
-autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
-autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-autocmd FileType c set omnifunc=ccomplete#Complete
+"autocmd FileType html :set omnifunc=htmlcomplete#CompleteTags
+"autocmd FileType python set omnifunc=pythoncomplete#Complete
+"autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+"autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+"autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
+"autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+"autocmd FileType c set omnifunc=ccomplete#Complete
 " May require ruby compiled in
-autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete 
+":autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete 
 
 
 
@@ -230,10 +234,14 @@ map ,r :TlistToggle<CR>
 "set complete=.,w,b,u,t,k
 "let g:AutoComplPop_CompleteOption = '.,w,b,u,t,k'
 "set complete=.
-let g:AutoComplPop_IgnoreCaseOption = 0
-let g:AutoComplPop_BehaviorKeywordLength = 2
+"let g:AutoComplPop_IgnoreCaseOption = 0
+"let g:AutoComplPop_BehaviorKeywordLength = 2
 
 
+" Use Ack instead of Grep when available
+if executable("ack")
+  set grepprg=ack\ -H\ --nogroup\ --nocolor
+endif
 
 " -----------------------------------------------------------------------------  
 " |                             OS Specific                                   |

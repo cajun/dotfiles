@@ -73,7 +73,7 @@ RUBY
 ruby << RUBY
   def finder
     @finder ||= begin
-      roots = VIM.evaluate("g:fuzzy_roots").split("\n")
+      roots = VIM.evaluate("g:fuzzy_roots") # .split("\n")
       ceiling = VIM.evaluate("g:fuzzy_ceiling").to_i
       ignore = VIM.evaluate("g:fuzzy_ignore").split(/[;,]/)
       FuzzyFileFinder.new(roots, ceiling, ignore)
@@ -98,7 +98,11 @@ RUBY
     let result = []
     ruby << RUBY
 
-      text = VIM.evaluate('s:RemovePrompt(a:base,self.prompt)')
+      begin
+        text = VIM.evaluate('s:RemovePrompt(a:base,self.prompt)')
+      rescue
+        text = ""
+      end
       enumerating_limit = VIM.evaluate('l:enumerating_limit').to_i
       path_display = VIM.evaluate("g:fuzzy_path_display")
       ceiling = VIM.evaluate('g:fuzzy_ceiling').to_i
