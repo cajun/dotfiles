@@ -1,7 +1,7 @@
 require 'irb/completion'
 
 # Load the gems that I want to use
-%w[rubygems looksee/shortcuts wirble].each do |gem|
+%w[rubygems looksee/shortcuts wirble utility_belt].each do |gem|
   begin
     require gem
   rescue LoadError
