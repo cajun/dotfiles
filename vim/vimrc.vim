@@ -150,6 +150,10 @@ filetype plugin indent on
 "autocmd FileType html :set filetype=xhtml 
 set autoread " Auto read when a file is changed from the outside
 
+augroup mkd
+  autocmd BufRead *.mkd  set ai formatoptions=tcroqn2 comments=n:&gt;
+augroup END
+      
 " Inser New Line **************************************************************
 map <S-Enter> O<ESC> " awesome, inserts new line without going into insert mode
 map <Enter> o<ESC>

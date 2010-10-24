@@ -1,7 +1,7 @@
 require 'irb/completion'
 
 # Load the gems that I want to use
-%w[rubygems looksee/shortcuts wirble utility_belt].each do |gem|
+%w[rubygems looksee/shortcuts wirble interactive_editor].each do |gem|
   begin
     require gem
   rescue LoadError
@@ -10,11 +10,31 @@ end
 
 # Init the Wirble Gem
 begin
+  require 'wirble'
   Wirble.init
   Wirble.colorize
 rescue LoadError => err
   warn "Couldn't load Wirble: #{err}"
 end
 
-load File.dirname(__FILE__) + '/.railsrc' if $0 == 'irb' && ENV['RAILS_ENV']
+def show_log
+  unless @log_buffer_size
+    @log_file = Rails.logger.instance_variable_get("@log")
+    @log_level = Rails.logger.level
+    @log_buffer_size = Rails.logger.auto_flushing
+  end
+  Rails.logger.flush
+  Rails.logger.instance_variable_set("@log", STDOUT)
+  Rails.logger.level = Logger::DEBUG
+  Rails.logger.auto_flushing = 1
+  nil
+end
 
+def hide_log
+  if @log_buffer_size
+    Rails.logger.instance_variable_set("@log", @log_file)
+    Rails.logger.level = @log_level
+    Rails.logger.auto_flushing = @log_buffer_size
+  end
+  nil
+end
