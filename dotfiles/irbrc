@@ -1,7 +1,7 @@
 require 'irb/completion'
 
 # Load the gems that I want to use
-%w[rubygems looksee/shortcuts wirble interactive_editor].each do |gem|
+%w[rubygems looksee/shortcuts wirble  hirb].each do |gem|
   begin
     require gem
   rescue LoadError
@@ -16,6 +16,13 @@ begin
 rescue LoadError => err
   warn "Couldn't load Wirble: #{err}"
 end
+
+#begin
+#  require 'hirb'
+#  Hirb::View.enable
+#rescue LoadError => err
+#  warn "Couldn't load Hirb: #{err}"
+#end
 
 def show_log
   unless @log_buffer_size
