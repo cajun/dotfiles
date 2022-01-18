@@ -1,7 +1,7 @@
 -- this will bootstrap Packer
 local install_path = vim.fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-	packer_bootstrap = fn.system({
+	packer_bootstrap = vim.fn.system({
 		"git",
 		"clone",
 		"--depth",
@@ -27,7 +27,6 @@ require("packer").startup(function(use)
 	use("mhartington/formatter.nvim")
 	use("simrat39/rust-tools.nvim")
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use("nvim-treesitter/nvim-treesitter-textobjects")
 	use("williamboman/nvim-lsp-installer")
 
 	use({ "ms-jpq/coq_nvim", branch = "coq" })
@@ -40,7 +39,7 @@ require("packer").startup(function(use)
 	use("ggandor/lightspeed.nvim")
 
 	use({ "nvim-lualine/lualine.nvim", requires = { "kyazdani42/nvim-web-devicons", opt = true } })
-	use("rebelot/kanagawa.nvim")
+	use({ "catppuccin/nvim", as = "catppuccin" })
 
 	use("SmiteshP/nvim-gps")
 
@@ -69,7 +68,7 @@ vim.o.backup = true
 vim.o.undolevels = 1000
 vim.o.undoreload = 10000
 vim.o.termguicolors = true
-vim.cmd([[colorscheme kanagawa ]])
+vim.cmd([[colorscheme catppuccin ]])
 
 vim.cmd([[
   augroup TrimWhitespace
@@ -281,8 +280,9 @@ augroup END
 
 -- Lualine
 local gps = require("nvim-gps")
+gps.setup()
 require("lualine").setup({
-	options = { theme = "kanagawa" },
+	options = { theme = "catppuccin" },
 	sections = {
 		lualine_c = {
 			{ gps.get_location, cond = gps.is_available },
