@@ -11,7 +11,7 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 	})
 end
 
-require("packer").startup(function(use)
+require("packer").startup({function(use)
 	-- Packer can manage itself
 	use("wbthomason/packer.nvim")
 
@@ -19,42 +19,83 @@ require("packer").startup(function(use)
 	use("tpope/vim-surround")
 	use("tpope/vim-commentary")
 	use("tpope/vim-rails")
-	use("tpope/vim-unimpaired")
+	-- use("tpope/vim-unimpaired")
 	use("tpope/vim-fugitive")
+	use("tpope/vim-vinegar")
 
+	-- Making UI nicer
+	use("rcarriga/nvim-notify")
+	use("hood/popui.nvim")
+	use("RishabhRD/popfix")
+
+	-- use("github/copilot.vim")
+
+	-- LSP Tools
 	use("neovim/nvim-lspconfig")
-	use("nvim-lua/lsp-status.nvim")
-	use("mhartington/formatter.nvim")
-	use("simrat39/rust-tools.nvim")
-	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use("williamboman/nvim-lsp-installer")
+	use("nvim-lua/lsp-status.nvim")
+	use("simrat39/rust-tools.nvim")
 
+	-- General formatter
+	use("mhartington/formatter.nvim")
+
+	-- Syntax highlighting and awesomness
+	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
+	use({ "nvim-treesitter/playground"})
+
+	-- Auto complete
 	use({ "ms-jpq/coq_nvim", branch = "coq" })
 	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
-	use({ "ms-jpq/chadtree", branch = "chad", run = "python3 -m chadtree deps" })
 
+	-- fzf finder
 	use({ "ibhagwan/fzf-lua", requires = { "kyazdani42/nvim-web-devicons" } })
 	use({ "junegunn/fzf", run = "./install --bin" })
-	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
-	use("ggandor/lightspeed.nvim")
 
-	use({ "nvim-lualine/lualine.nvim", requires = { "kyazdani42/nvim-web-devicons", opt = true } })
+	-- Git in side bar
+	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
+
+	-- Status line
+	use("NTBBloodbath/galaxyline.nvim")
+
+	-- Color scheme
 	use({ "catppuccin/nvim", as = "catppuccin" })
 
-	use("SmiteshP/nvim-gps")
+	-- Line to display scoping
+	use("lukas-reineke/indent-blankline.nvim")
+
+	-- Jummping around quickly in a file
+	use("ggandor/lightspeed.nvim")
+
+	-- Highlight the word under the cursor
+	use("RRethy/vim-illuminate")
+
+	-- Add documentation to class / function / method
+	use({
+		"danymat/neogen",
+		config = function()
+			require('neogen').setup()
+		end
+	})
 
 	-- Automatically set up your configuration after cloning packer.nvim
 	-- Put this at the end after all plugins
 	if packer_bootstrap then
 		require("packer").sync()
 	end
-end)
+end,
+config = {
+		display = {
+			open_fn = require('packer.util').float,
+		}
+	}
+})
 
 -- Settings
 vim.api.nvim_set_keymap("", "<Space>", "<Nop>", { noremap = true, silent = true })
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.o.wrap = false
+vim.o.spell = true
 vim.o.splitright = true
 vim.o.cursorline = true
 vim.o.relativenumber = true
@@ -77,6 +118,13 @@ vim.cmd([[
   augroup end
 ]])
 
+vim.cmd([[
+  augroup ReloadInit
+    autocmd!
+    autocmd BufWritePost $MYVIMRC :source $MYVIMRC
+  augroup end
+]])
+
 -- Coq
 vim.g.coq_settings = { auto_start = "shut-up", clients = { tabnine = { enabled = true } } }
 
@@ -95,7 +143,6 @@ local servers = {
 	"jsonls",
 	"pyright",
 	"rome",
-	"rust_analyzer",
 	"taplo",
 	"sumneko_lua",
 }
@@ -105,6 +152,7 @@ lsp_status.register_progress()
 
 local on_attach = function(client, bufnr)
 	lsp_status.on_attach(client)
+	require 'illuminate'.on_attach(client)
 	local opts = { noremap = true, silent = true }
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -130,27 +178,6 @@ local on_attach = function(client, bufnr)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 end
 
--- Setting up rust
-require("rust-tools").setup({
-	tools = {
-		autoSetHints = true,
-		hover_with_actions = true,
-		inlay_hints = {
-			show_parameter_hints = false,
-			parameter_hints_prefix = "",
-			other_hints_prefix = "",
-		},
-	},
-	server = {
-		settings = {
-			["rust-analyzer"] = {
-				cargo = { loadOutDirsFromCheck = true },
-				checkOnSave = { command = "clippy" },
-			},
-		},
-	},
-})
-
 for _, name in pairs(servers) do
 	local server_is_found, server = lsp_installer.get_server(name)
 	if server_is_found then
@@ -162,9 +189,43 @@ for _, name in pairs(servers) do
 end
 
 lsp_installer.on_server_ready(function(server)
-	local opts = { on_attach = on_attach, capabibilities = lsp_status.capabibilities }
+	local opts = { on_attach = on_attach, capabilities = lsp_status.capabilities }
+	if server.name == 'sumneko_lua' then
+		opts = {
+			on_attach = on_attach,
+			capabilities = lsp_status.capabilities,
+			settings = {
+				Lua = {
+					diagnostic = {
+						globals = { 'vim' }
+					}
+				}
+			}
+		}
+	end
 	server:setup(require("coq").lsp_ensure_capabilities(opts))
 end)
+
+require("rust-tools").setup({
+	tools = {
+		inlay_hints = {
+			show_variable_name = true,
+		},
+	},
+	server = require("coq").lsp_ensure_capabilities({
+		on_attach = on_attach,
+		capabilities = lsp_status.capabilities,
+		settings = {
+			["rust-analyzer"] = {
+				cargo = { loadOutDirsFromCheck = true },
+				checkOnSave = { command = "clippy" },
+				procMacro = { enable = true },
+			},
+		},
+	}),
+})
+
+-- Setting up rust
 
 -- Treesitter
 require("nvim-treesitter.configs").setup({
@@ -172,10 +233,9 @@ require("nvim-treesitter.configs").setup({
 	highlight = { enable = true },
 	indent = { enable = true },
 	incremental_selection = { enable = true },
+	playground = { enable = true },
+	query_linter = { enable = true },
 })
-
--- CHADtree
-map("n", "<leader>v", "<cmd>CHADopen<cr>", {})
 
 -- fzf-lua
 map("n", "<leader><space>", [[<cmd>lua require('fzf-lua').buffers()<CR>]], { noremap = true, silent = true })
@@ -272,20 +332,25 @@ vim.api.nvim_exec(
 	[[
 augroup FormatAutogroup
   autocmd!
-  autocmd BufWritePost *.js,*.rs,*.lua,*.rb FormatWrite
+  autocmd BufWritePost *.js,*.rs,*.lua,*.rb,*.erb,*.rake,*.py FormatWrite
 augroup END
 ]],
 	true
 )
 
--- Lualine
-local gps = require("nvim-gps")
-gps.setup()
-require("lualine").setup({
-	options = { theme = "catppuccin" },
-	sections = {
-		lualine_c = {
-			{ gps.get_location, cond = gps.is_available },
-		},
-	},
+vim.notify = require("notify")
+vim.ui.select = require("popui.ui-overrider")
+vim.g.popui_border_style = "rounded"
+require("galaxyline.themes.eviline")
+
+vim.opt.list = true
+vim.opt.listchars:append("space:⋅")
+vim.opt.listchars:append("eol:↴")
+
+require("indent_blankline").setup({
+	space_char_blankline = " ",
+	show_current_context = true,
+	show_current_context_start = true,
+	use_treesitter = true,
+	char_list = {'|', '¦', '┆', '┊'}
 })
