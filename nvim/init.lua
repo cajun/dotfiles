@@ -11,83 +11,84 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 	})
 end
 
-require("packer").startup({function(use)
-	-- Packer can manage itself
-	use("wbthomason/packer.nvim")
+require("packer").startup({
+	function(use)
+		-- Packer can manage itself
+		use("wbthomason/packer.nvim")
 
-	-- The tpope
-	use("tpope/vim-surround")
-	use("tpope/vim-commentary")
-	use("tpope/vim-rails")
-	-- use("tpope/vim-unimpaired")
-	use("tpope/vim-fugitive")
-	use("tpope/vim-vinegar")
+		-- The tpope
+		use("tpope/vim-surround")
+		use("tpope/vim-commentary")
+		use("tpope/vim-rails")
+		-- use("tpope/vim-unimpaired")
+		use("tpope/vim-fugitive")
+		use("tpope/vim-vinegar")
 
-	-- Making UI nicer
-	use("rcarriga/nvim-notify")
-	use("hood/popui.nvim")
-	use("RishabhRD/popfix")
+		-- Making UI nicer
+		use("rcarriga/nvim-notify")
+		use("hood/popui.nvim")
+		use("RishabhRD/popfix")
 
-	-- use("github/copilot.vim")
+		-- use("github/copilot.vim")
 
-	-- LSP Tools
-	use("neovim/nvim-lspconfig")
-	use("williamboman/nvim-lsp-installer")
-	use("nvim-lua/lsp-status.nvim")
-	use("simrat39/rust-tools.nvim")
+		-- LSP Tools
+		use("neovim/nvim-lspconfig")
+		use("williamboman/nvim-lsp-installer")
+		use("nvim-lua/lsp-status.nvim")
+		use("simrat39/rust-tools.nvim")
 
-	-- General formatter
-	use("mhartington/formatter.nvim")
+		-- General formatter
+		use("mhartington/formatter.nvim")
 
-	-- Syntax highlighting and awesomness
-	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use({ "nvim-treesitter/playground"})
+		-- Syntax highlighting and awesomness
+		use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
+		use({ "nvim-treesitter/playground" })
 
-	-- Auto complete
-	use({ "ms-jpq/coq_nvim", branch = "coq" })
-	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
+		-- Auto complete
+		use({ "ms-jpq/coq_nvim", branch = "coq" })
+		use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 
-	-- fzf finder
-	use({ "ibhagwan/fzf-lua", requires = { "kyazdani42/nvim-web-devicons" } })
-	use({ "junegunn/fzf", run = "./install --bin" })
+		-- fzf finder
+		use({ "ibhagwan/fzf-lua", requires = { "kyazdani42/nvim-web-devicons" } })
+		use({ "junegunn/fzf", run = "./install --bin" })
 
-	-- Git in side bar
-	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
+		-- Git in side bar
+		use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
 
-	-- Status line
-	use("NTBBloodbath/galaxyline.nvim")
+		-- Status line
+		use("NTBBloodbath/galaxyline.nvim")
 
-	-- Color scheme
-	use({ "catppuccin/nvim", as = "catppuccin" })
+		-- Color scheme
+		use({ "catppuccin/nvim", as = "catppuccin" })
 
-	-- Line to display scoping
-	use("lukas-reineke/indent-blankline.nvim")
+		-- Line to display scoping
+		use("lukas-reineke/indent-blankline.nvim")
 
-	-- Jummping around quickly in a file
-	use("ggandor/lightspeed.nvim")
+		-- Jummping around quickly in a file
+		use("ggandor/lightspeed.nvim")
 
-	-- Highlight the word under the cursor
-	use("RRethy/vim-illuminate")
+		-- Highlight the word under the cursor
+		use("RRethy/vim-illuminate")
 
-	-- Add documentation to class / function / method
-	use({
-		"danymat/neogen",
-		config = function()
-			require('neogen').setup()
+		-- Add documentation to class / function / method
+		use({
+			"danymat/neogen",
+			config = function()
+				require("neogen").setup()
+			end,
+		})
+
+		-- Automatically set up your configuration after cloning packer.nvim
+		-- Put this at the end after all plugins
+		if packer_bootstrap then
+			require("packer").sync()
 		end
-	})
-
-	-- Automatically set up your configuration after cloning packer.nvim
-	-- Put this at the end after all plugins
-	if packer_bootstrap then
-		require("packer").sync()
-	end
-end,
-config = {
+	end,
+	config = {
 		display = {
-			open_fn = require('packer.util').float,
-		}
-	}
+			open_fn = require("packer.util").float,
+		},
+	},
 })
 
 -- Settings
@@ -152,7 +153,7 @@ lsp_status.register_progress()
 
 local on_attach = function(client, bufnr)
 	lsp_status.on_attach(client)
-	require 'illuminate'.on_attach(client)
+	require("illuminate").on_attach(client)
 	local opts = { noremap = true, silent = true }
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -190,17 +191,17 @@ end
 
 lsp_installer.on_server_ready(function(server)
 	local opts = { on_attach = on_attach, capabilities = lsp_status.capabilities }
-	if server.name == 'sumneko_lua' then
+	if server.name == "sumneko_lua" then
 		opts = {
 			on_attach = on_attach,
 			capabilities = lsp_status.capabilities,
 			settings = {
 				Lua = {
 					diagnostic = {
-						globals = { 'vim' }
-					}
-				}
-			}
+						globals = { "vim" },
+					},
+				},
+			},
 		}
 	end
 	server:setup(require("coq").lsp_ensure_capabilities(opts))
@@ -352,5 +353,5 @@ require("indent_blankline").setup({
 	show_current_context = true,
 	show_current_context_start = true,
 	use_treesitter = true,
-	char_list = {'|', '¦', '┆', '┊'}
+	char_list = { "|", "¦", "┆", "┊" },
 })
