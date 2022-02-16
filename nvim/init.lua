@@ -11,84 +11,109 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 	})
 end
 
-require("packer").startup({
-	function(use)
-		-- Packer can manage itself
-		use("wbthomason/packer.nvim")
+require("packer").startup({function(use)
+	-- Packer can manage itself
+	use("wbthomason/packer.nvim")
 
-		-- The tpope
-		use("tpope/vim-surround")
-		use("tpope/vim-commentary")
-		use("tpope/vim-rails")
-		-- use("tpope/vim-unimpaired")
-		use("tpope/vim-fugitive")
-		use("tpope/vim-vinegar")
+	-- The tpope
+	use("tpope/vim-surround")
+	use("tpope/vim-commentary")
+	use("tpope/vim-rails")
+	-- use("tpope/vim-unimpaired")
+	use("tpope/vim-fugitive")
+	use("tpope/vim-vinegar")
 
-		-- Making UI nicer
-		use("rcarriga/nvim-notify")
-		use("hood/popui.nvim")
-		use("RishabhRD/popfix")
+	-- Making UI nicer
+	use("rcarriga/nvim-notify")
+	use("hood/popui.nvim")
+	use("RishabhRD/popfix")
 
-		-- use("github/copilot.vim")
+	-- use("github/copilot.vim")
 
-		-- LSP Tools
-		use("neovim/nvim-lspconfig")
-		use("williamboman/nvim-lsp-installer")
-		use("nvim-lua/lsp-status.nvim")
-		use("simrat39/rust-tools.nvim")
+	-- LSP Tools
+	use("neovim/nvim-lspconfig")
+	use("williamboman/nvim-lsp-installer")
+	use("nvim-lua/lsp-status.nvim")
+	use("simrat39/rust-tools.nvim")
 
-		-- General formatter
-		use("mhartington/formatter.nvim")
 
-		-- Syntax highlighting and awesomness
-		use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-		use({ "nvim-treesitter/playground" })
 
-		-- Auto complete
-		use({ "ms-jpq/coq_nvim", branch = "coq" })
-		use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 
-		-- fzf finder
-		use({ "ibhagwan/fzf-lua", requires = { "kyazdani42/nvim-web-devicons" } })
-		use({ "junegunn/fzf", run = "./install --bin" })
+	-- General formatter
+	use("mhartington/formatter.nvim")
 
-		-- Git in side bar
-		use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
+	-- Syntax highlighting and awesomness
+	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
+	use({ "nvim-treesitter/playground"})
 
-		-- Status line
-		use("NTBBloodbath/galaxyline.nvim")
+	-- Auto complete
+	use({ "ms-jpq/coq_nvim", branch = "coq", run = ":COQdeps" })
+	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 
-		-- Color scheme
-		use({ "catppuccin/nvim", as = "catppuccin" })
+	-- fzf finder
+	use({ "ibhagwan/fzf-lua", requires = { "kyazdani42/nvim-web-devicons" } })
+	use({ "junegunn/fzf", run = "./install --bin" })
 
-		-- Line to display scoping
-		use("lukas-reineke/indent-blankline.nvim")
+	-- Git in side bar
+	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
 
-		-- Jummping around quickly in a file
-		use("ggandor/lightspeed.nvim")
+	-- Status line
+	use("NTBBloodbath/galaxyline.nvim")
 
-		-- Highlight the word under the cursor
-		use("RRethy/vim-illuminate")
+	-- Color scheme
+	use({ "catppuccin/nvim", as = "catppuccin" })
 
-		-- Add documentation to class / function / method
-		use({
-			"danymat/neogen",
-			config = function()
-				require("neogen").setup()
-			end,
-		})
+	use 'folke/lsp-colors.nvim'
 
-		-- Automatically set up your configuration after cloning packer.nvim
-		-- Put this at the end after all plugins
-		if packer_bootstrap then
-			require("packer").sync()
+	-- Line to display scoping
+	use("lukas-reineke/indent-blankline.nvim")
+
+	-- Jummping around quickly in a file
+	use("ggandor/lightspeed.nvim")
+
+	use({
+		'lewis6991/spellsitter.nvim',
+		config = function()
+			require('spellsitter').setup()
 		end
-	end,
+	})
+	-- Highlight the word under the cursor
+	use("RRethy/vim-illuminate")
+
+
+
+	-- Add documentation to class / function / method
+	use({
+		"danymat/neogen",
+		config = function()
+			require('neogen').setup()
+		end
+	})
+
+	 use('simrat39/symbols-outline.nvim')
+
+	-- Automatically set up your configuration after cloning packer.nvim
+	use( {
+		"folke/trouble.nvim",
+		requires = "kyazdani42/nvim-web-devicons",
+		config = function()
+			require("trouble").setup {
+				-- your configuration comes here
+				-- or leave it empty to use the default settings
+				-- refer to the configuration section below
+			}
+		end
+	})
+	-- Put this at the end after all plugins
+	if packer_bootstrap then
+		require("packer").sync()
+	end
+end,
 	config = {
 		display = {
-			open_fn = require("packer.util").float,
-		},
-	},
+			open_fn = require('packer.util').float,
+		}
+	}
 })
 
 -- Settings
@@ -114,15 +139,15 @@ vim.cmd([[colorscheme catppuccin ]])
 
 vim.cmd([[
   augroup TrimWhitespace
-    autocmd!
-    autocmd BufWritePre * :%s/\s\+$//e
+  autocmd!
+  autocmd BufWritePre * :%s/\s\+$//e
   augroup end
 ]])
 
 vim.cmd([[
   augroup ReloadInit
-    autocmd!
-    autocmd BufWritePost $MYVIMRC :source $MYVIMRC
+  autocmd!
+  autocmd BufWritePost $MYVIMRC :source $MYVIMRC
   augroup end
 ]])
 
@@ -144,8 +169,8 @@ local servers = {
 	"jsonls",
 	"pyright",
 	"rome",
-	"taplo",
 	"sumneko_lua",
+	"taplo",
 }
 
 local lsp_status = require("lsp-status")
@@ -153,7 +178,7 @@ lsp_status.register_progress()
 
 local on_attach = function(client, bufnr)
 	lsp_status.on_attach(client)
-	require("illuminate").on_attach(client)
+	require 'illuminate'.on_attach(client)
 	local opts = { noremap = true, silent = true }
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -191,19 +216,20 @@ end
 
 lsp_installer.on_server_ready(function(server)
 	local opts = { on_attach = on_attach, capabilities = lsp_status.capabilities }
-	if server.name == "sumneko_lua" then
+	if server.name == 'sumneko_lua' then
 		opts = {
 			on_attach = on_attach,
 			capabilities = lsp_status.capabilities,
 			settings = {
 				Lua = {
 					diagnostic = {
-						globals = { "vim" },
-					},
-				},
-			},
+						globals = { 'vim' }
+					}
+				}
+			}
 		}
 	end
+
 	server:setup(require("coq").lsp_ensure_capabilities(opts))
 end)
 
@@ -331,10 +357,10 @@ require("formatter").setup({
 
 vim.api.nvim_exec(
 	[[
-augroup FormatAutogroup
-  autocmd!
-  autocmd BufWritePost *.js,*.rs,*.lua,*.rb,*.erb,*.rake,*.py FormatWrite
-augroup END
+	augroup FormatAutogroup
+	autocmd!
+	autocmd BufWritePost *.js,*.rs,*.lua,*.rb,*.erb,*.rake,*.py FormatWrite
+	augroup END
 ]],
 	true
 )
@@ -353,5 +379,5 @@ require("indent_blankline").setup({
 	show_current_context = true,
 	show_current_context_start = true,
 	use_treesitter = true,
-	char_list = { "|", "¦", "┆", "┊" },
+	char_list = {'|', '¦', '┆', '┊'}
 })
