@@ -11,7 +11,7 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 	})
 end
 
-require("packer").startup({function(use)
+require("packer").startup({ function(use)
 	-- Packer can manage itself
 	use("wbthomason/packer.nvim")
 
@@ -24,7 +24,7 @@ require("packer").startup({function(use)
 	use("tpope/vim-vinegar")
 
 	-- Making UI nicer
-	use("rcarriga/nvim-notify")
+	-- use("rcarriga/nvim-notify")
 	use("hood/popui.nvim")
 	use("RishabhRD/popfix")
 
@@ -36,15 +36,13 @@ require("packer").startup({function(use)
 	use("nvim-lua/lsp-status.nvim")
 	use("simrat39/rust-tools.nvim")
 
-
-
-
+	use("editorconfig/editorconfig-vim")
 	-- General formatter
 	use("mhartington/formatter.nvim")
 
 	-- Syntax highlighting and awesomness
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use({ "nvim-treesitter/playground"})
+	use({ "nvim-treesitter/playground" })
 
 	-- Auto complete
 	use({ "ms-jpq/coq_nvim", branch = "coq", run = ":COQdeps" })
@@ -71,12 +69,6 @@ require("packer").startup({function(use)
 	-- Jummping around quickly in a file
 	use("ggandor/lightspeed.nvim")
 
-	use({
-		'lewis6991/spellsitter.nvim',
-		config = function()
-			require('spellsitter').setup()
-		end
-	})
 	-- Highlight the word under the cursor
 	use("RRethy/vim-illuminate")
 
@@ -90,10 +82,10 @@ require("packer").startup({function(use)
 		end
 	})
 
-	 use('simrat39/symbols-outline.nvim')
+	use('simrat39/symbols-outline.nvim')
 
 	-- Automatically set up your configuration after cloning packer.nvim
-	use( {
+	use({
 		"folke/trouble.nvim",
 		requires = "kyazdani42/nvim-web-devicons",
 		config = function()
@@ -109,14 +101,22 @@ require("packer").startup({function(use)
 		require("packer").sync()
 	end
 end,
-	config = {
-		display = {
-			open_fn = require('packer.util').float,
-		}
+config = {
+	display = {
+		open_fn = require('packer.util').float,
 	}
+}
 })
 
--- Settings
+local catppuccin = require('catppuccin')
+catppuccin.setup({
+	transparent_background = true,
+	integrations = {
+		lightspeed = true
+	}
+
+})
+
 vim.api.nvim_set_keymap("", "<Space>", "<Nop>", { noremap = true, silent = true })
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -139,8 +139,8 @@ vim.cmd([[colorscheme catppuccin ]])
 
 local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
 for type, icon in pairs(signs) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+	local hl = "DiagnosticSign" .. type
+	vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
 vim.cmd([[
@@ -164,20 +164,8 @@ vim.g.coq_settings = { auto_start = "shut-up", clients = { tabnine = { enabled =
 local map = vim.api.nvim_set_keymap
 
 -- LSP Installer
-local lsp_installer = require("nvim-lsp-installer")
-
--- Include the servers you want to have installed by default below
-local servers = {
-	"bashls",
-	"cssls",
-	"dockerls",
-	"html",
-	"jsonls",
-	"pyright",
-	"rome",
-	"sumneko_lua",
-	"taplo",
-}
+require("nvim-lsp-installer").setup {}
+local lspconfig = require('lspconfig')
 
 local lsp_status = require("lsp-status")
 lsp_status.register_progress()
@@ -185,6 +173,7 @@ lsp_status.register_progress()
 local on_attach = function(client, bufnr)
 	lsp_status.on_attach(client)
 	require 'illuminate'.on_attach(client)
+
 	local opts = { noremap = true, silent = true }
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -210,39 +199,54 @@ local on_attach = function(client, bufnr)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 end
 
-for _, name in pairs(servers) do
-	local server_is_found, server = lsp_installer.get_server(name)
-	if server_is_found then
-		if not server:is_installed() then
-			print("Installing " .. name)
-			server:install()
-		end
-	end
+
+local opts = { on_attach = on_attach, capabilities = lsp_status.capabilities }
+local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'solargraph' };
+
+for _, lsp in ipairs(servers) do
+	lspconfig[lsp].setup(require("coq").lsp_ensure_capabilities(opts))
 end
 
-lsp_installer.on_server_ready(function(server)
-	local opts = { on_attach = on_attach, capabilities = lsp_status.capabilities }
-	if server.name == 'sumneko_lua' then
-		opts = {
-			on_attach = on_attach,
-			capabilities = lsp_status.capabilities,
-			settings = {
-				Lua = {
-					diagnostic = {
-						globals = { 'vim' }
-					}
-				}
-			}
-		}
-	end
+-- Make runtime files discoverable to the server
+local runtime_path = vim.split(package.path, ';')
+table.insert(runtime_path, 'lua/?.lua')
+table.insert(runtime_path, 'lua/?/init.lua')
 
-	server:setup(require("coq").lsp_ensure_capabilities(opts))
-end)
+lspconfig.sumneko_lua.setup {
+	on_attach = on_attach,
+	capabilities = lsp_status.capabilities,
+	settings = {
+		Lua = {
+			runtime = {
+				-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+				version = 'LuaJIT',
+				-- Setup your lua path
+				path = runtime_path,
+			},
+			diagnostics = {
+				-- Get the language server to recognize the `vim` global
+				globals = { 'vim' },
+			},
+			workspace = {
+				-- Make the server aware of Neovim runtime files
+				library = vim.api.nvim_get_runtime_file('', true),
+			},
+			-- Do not send telemetry data containing a randomized but unique identifier
+			telemetry = {
+				enable = false,
+			},
+		},
+	},
+}
 
 require("rust-tools").setup({
 	tools = {
+		autoSetHints = true,
+		hover_with_actions = true,
 		inlay_hints = {
 			show_variable_name = true,
+			parameter_hints_prefix = "",
+			other_hints_prefix = "",
 		},
 	},
 	server = require("coq").lsp_ensure_capabilities({
@@ -262,7 +266,7 @@ require("rust-tools").setup({
 
 -- Treesitter
 require("nvim-treesitter.configs").setup({
-	ensure_installed = "maintained",
+	ensure_installed = { "ruby", "rust", "javascript", "proto", "html", "css", "dockerfile", "fish" },
 	highlight = { enable = true },
 	indent = { enable = true },
 	incremental_selection = { enable = true },
@@ -302,7 +306,7 @@ require("formatter").setup({
 			function()
 				return {
 					exe = "rustfmt",
-					args = { "--emit=stdout" },
+					args = { "--emit=stdout", "--edition=2021" },
 					stdin = true,
 				}
 			end,
@@ -364,14 +368,15 @@ require("formatter").setup({
 vim.api.nvim_exec(
 	[[
 	augroup FormatAutogroup
-	autocmd!
-	autocmd BufWritePost *.js,*.rs,*.lua,*.rb,*.erb,*.rake,*.py FormatWrite
+		autocmd!
+		autocmd BufWritePost *.js,*.rs,*.lua,*.rb,*.erb,*.rake,*.py FormatWrite
+		autocmd BufWritePre *.js,*.rs,*.lua,*.rb,*.erb,*.rake,*.py lua vim.lsp.buf.formatting_sync(nil,200)
 	augroup END
 ]],
 	true
 )
 
-vim.notify = require("notify")
+-- vim.notify = require("notify")
 vim.ui.select = require("popui.ui-overrider")
 vim.g.popui_border_style = "rounded"
 require("galaxyline.themes.eviline")
@@ -385,5 +390,5 @@ require("indent_blankline").setup({
 	show_current_context = true,
 	show_current_context_start = true,
 	use_treesitter = true,
-	char_list = {'|', '¦', '┆', '┊'}
+	char_list = { '|', '¦', '┆', '┊' }
 })
