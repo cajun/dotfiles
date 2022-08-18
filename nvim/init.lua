@@ -22,6 +22,8 @@ require("packer").startup({ function(use)
 	-- use("tpope/vim-unimpaired")
 	use("tpope/vim-fugitive")
 	use("tpope/vim-vinegar")
+	use("tpope/vim-dadbod")
+	use("kristijanhusak/vim-dadbod-ui")
 
 	-- Making UI nicer
 	-- use("rcarriga/nvim-notify")
@@ -101,11 +103,11 @@ require("packer").startup({ function(use)
 		require("packer").sync()
 	end
 end,
-config = {
-	display = {
-		open_fn = require('packer.util').float,
+	config = {
+		display = {
+			open_fn = require('packer.util').float,
+		}
 	}
-}
 })
 
 local catppuccin = require('catppuccin')
